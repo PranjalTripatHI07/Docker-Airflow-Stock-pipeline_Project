@@ -1,1 +1,76 @@
 
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  airflow-init:
+    image: apache/airflow:2.10.2
+    container_name: airflow-init
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      _AIRFLOW_DB_UPGRADE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: "admin"
+      _AIRFLOW_WWW_USER_PASSWORD: "admin"
+    command: >
+      bash -c "airflow db upgrade &&
+               airflow users create --role Admin --username admin --password admin --firstname Admin --lastname User --email admin@example.com || true"
+
+  airflow-webserver:
+    image: apache/airflow:2.10.2
+    container_name: airflow-webserver
+    depends_on:
+      - postgres
+      - airflow-init
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+       - ./airflow/dags:/opt/airflow/dags
+       - ./airflow/scripts:/opt/airflow/dags/scripts
+       - ./airflow/requirements.txt:/opt/airflow/requirements.txt
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "pip install -r /opt/airflow/requirements.txt &&
+               airflow webserver"
+
+  airflow-scheduler:
+    image: apache/airflow:2.10.2
+    container_name: airflow-scheduler
+    depends_on:
+      - postgres
+      - airflow-init
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/scripts:/opt/airflow/dags/scripts
+      - ./airflow/requirements.txt:/opt/airflow/requirements.txt
+    command: >
+      bash -c "pip install -r /opt/airflow/requirements.txt &&
+               airflow scheduler"
+
+volumes:
+  postgres_data:
