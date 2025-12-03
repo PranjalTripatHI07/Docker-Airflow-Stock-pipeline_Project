@@ -16,6 +16,155 @@
 
 ---
 
+
+## 📊 Monitoring
+
+### Airflow Web Interface
+
+The Airflow web UI provides comprehensive monitoring capabilities:
+
+- **📈 DAG Overview**: Visual pipeline representation
+- **📋 Task Logs**: Detailed execution logs for debugging
+- **⏰ Schedule History**: Track successful and failed runs
+- **🔄 Manual Triggers**: Run pipelines on-demand
+
+#### 🖼️ Screenshots
+
+<details>
+<summary>📈 <b>Airflow DAG Overview</b></summary>
+
+![Airflow DAG List](screenshots/airflow-dag-list.png)
+*Main DAGs page showing the stock_price_pipeline*
+
+![DAG Graph View](screenshots/airflow-dag-graph.png)
+*Graph view of the stock price pipeline DAG*
+
+![DAG Tree View](screenshots/airflow-dag-tree.png)
+*Tree view showing task execution history*
+
+</details>
+
+<details>
+<summary>📋 <b>Task Monitoring & Logs</b></summary>
+
+![Task Instance Details](screenshots/airflow-task-details.png)
+*Task instance details and execution status*
+
+![Task Logs](screenshots/airflow-task-logs.png)
+*Detailed task logs for debugging*
+
+![Gantt Chart](screenshots/airflow-gantt-chart.png)
+*Gantt chart view of task execution timeline*
+
+</details>
+
+#### 🎥 Screen Recordings
+
+<details>
+<summary>🎬 <b>Airflow Workflow Demonstrations</b></summary>
+
+**Pipeline Execution Flow**
+![Pipeline Demo](recordings/airflow-pipeline-demo.gif)
+*Complete pipeline execution from trigger to completion*
+
+**Manual DAG Trigger**
+![Manual Trigger](recordings/airflow-manual-trigger.gif)
+*How to manually trigger the stock price pipeline*
+
+**Log Navigation**
+![Log Navigation](recordings/airflow-log-navigation.gif)
+*Navigating through task logs and execution details*
+
+</details>
+
+### Database Monitoring
+
+Connect to PostgreSQL to query your data:
+
+```bash
+# Connect to database
+docker exec -it postgres psql -U airflow -d airflow
+
+# Query stock data
+SELECT symbol, price, timestamp 
+FROM stock_prices 
+ORDER BY timestamp DESC 
+LIMIT 10;
+```
+
+#### 🖼️ Database Screenshots
+
+<details>
+<summary>🗄️ <b>PostgreSQL Data Views</b></summary>
+
+![Database Connection](screenshots/postgres-connection.png)
+*Connecting to PostgreSQL database*
+
+![Stock Data Table](screenshots/postgres-stock-data.png)
+*Sample stock data stored in the database*
+
+![Database Schema](screenshots/postgres-schema.png)
+*Database schema and table structure*
+
+![Query Results](screenshots/postgres-query-results.png)
+*Sample query results showing recent stock prices*
+
+</details>
+
+#### 🎥 Database Screen Recordings
+
+<details>
+<summary>🎬 <b>Database Operations</b></summary>
+
+**Data Insertion Process**
+![Data Insert](recordings/postgres-data-insert.gif)
+*Real-time data insertion during pipeline execution*
+
+**Query Demonstrations**
+![Query Demo](recordings/postgres-query-demo.gif)
+*Various SQL queries to analyze stock data*
+
+**Database Monitoring**
+![DB Monitoring](recordings/postgres-monitoring.gif)
+*Monitoring database performance and connection status*
+
+</details>
+
+// ...existing code...
+
+## 📸 Complete Setup Walkthrough
+
+### 🎥 End-to-End Demo
+
+<details>
+<summary>🎬 <b>Complete Pipeline Setup & Execution</b></summary>
+
+**Full Setup Process**
+![Complete Setup](recordings/complete-setup-demo.gif)
+*From clone to running pipeline - complete walkthrough*
+
+**Data Flow Visualization**
+![Data Flow](recordings/data-flow-demo.gif)
+*Visualizing data flow from API to database*
+
+</details>
+
+### 📷 Quick Reference Gallery
+
+<details>
+<summary>🖼️ <b>Key Interface Screenshots</b></summary>
+
+| Component | Screenshot |
+|-----------|------------|
+| **Airflow Login** | ![Login](screenshots/airflow-login.png) |
+| **DAG Status** | ![DAG Status](screenshots/dag-status.png) |
+| **Task Success** | ![Task Success](screenshots/task-success.png) |
+| **Database Data** | ![DB Data](screenshots/db-data-sample.png) |
+
+</details>
+
+--- 
+
 ## 📋 Features
 
 - **🔄 Automated Data Collection**: Fetches real-time stock data from Alpha Vantage API every hour
