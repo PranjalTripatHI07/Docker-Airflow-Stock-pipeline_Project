@@ -18,8 +18,6 @@
 
 
 
---- 
-
 ## 📋 Features
 
 - **🔄 Automated Data Collection**: Fetches real-time stock data from Alpha Vantage API every hour
