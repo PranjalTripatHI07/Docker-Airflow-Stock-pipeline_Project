@@ -380,8 +380,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **⭐ Star this repository if it helped you!**
 
-[Report Bug](../../issues) • [Request Feature](../../issues) • [Documentation](../../wiki)
+[Report Bug](../../issues) • [Request Feature](../../issues) 
 
-Made with ❤️ by [Pranjal Tripathi](https://github.com/pranjal-tripathi)
+Made by [Pranjal Tripathi](https://github.com/pranjal-tripathi)
 
 </div>
