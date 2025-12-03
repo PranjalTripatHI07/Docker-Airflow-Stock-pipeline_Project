@@ -1,321 +1,385 @@
-# 🚀 Dockerized Stock Market ETL Pipeline
+<div align="center">
 
-*Automated end-to-end ETL pipeline using Airflow, Python, PostgreSQL & Docker*
+# 📈 Docker Airflow Stock Pipeline
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10+-blue.svg" />
-  <img src="https://img.shields.io/badge/Airflow-2.9.0-orange.svg" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-blue.svg" />
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker&logoColor=white" />
-  <img src="https://img.shields.io/badge/ETL-Pipeline-green.svg" />
-  <img src="https://img.shields.io/badge/Made%20With-%E2%9D%A4-red.svg" />
-</p>
+*A robust, automated stock data pipeline using Apache Airflow, PostgreSQL, and Alpha Vantage API*
 
----
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-2.10.2-blue.svg)](https://airflow.apache.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)](https://www.docker.com/)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB.svg)](https://www.python.org/)
 
-## 📚 Table of Contents
+[🚀 Quick Start](#-quick-start) • [📋 Features](#-features) • [🏗️ Architecture](#️-architecture) • [📊 Monitoring](#-monitoring) • [🔧 Configuration](#-configuration)
 
-* [📘 Overview](#-overview)
-* [🏗 Architecture](#-architecture)
-* [📁 Project Structure](#-project-structure)
-* [🛠️ Tech Stack](#️-tech-stack)
-* [🔑 Environment Variables](#-environment-variables)
-* [▶️ How to Run the Pipeline](#️-how-to-run-the-pipeline)
-* [🗄 Database Table](#-database-table)
-* [🐍 ETL Logic](#-etl-logic)
-* [⚠️ Error Handling & Robustness](#️-error-handling--robustness)
-* [⏱ Airflow DAG Scheduling](#-airflow-dag-scheduling)
-* [🐳 Docker Services](#-docker-services)
-* [🚀 Optional Enhancements](#-optional-enhancements)
-* [📸 Screenshots (Optional)](#-screenshots-optional)
-* [✅ Assignment Requirements Checklist](#-assignment-requirements-checklist)
+</div>
 
 ---
 
-# 📘 Overview
+## 📋 Features
 
-This project implements a **Dockerized data pipeline** using:
+- **🔄 Automated Data Collection**: Fetches real-time stock data from Alpha Vantage API every hour
+- **📊 Data Storage**: Stores structured stock data in PostgreSQL with proper indexing
+- **🛠️ Orchestration**: Uses Apache Airflow for workflow management and scheduling
+- **🐳 Containerized**: Fully containerized with Docker Compose for easy deployment
+- **🔍 Monitoring**: Built-in Airflow web UI for pipeline monitoring and debugging
+- **⚡ Scalable**: Configurable for multiple stock symbols and intervals
+- **🔐 Secure**: Environment-based configuration management
 
-* **Apache Airflow** for workflow orchestration
-* **Python** for extraction & transformation
-* **PostgreSQL** for persistent storage
-* **Docker Compose** for containerized setup
-
-The goal is to fetch **daily stock prices** from the **Alpha Vantage API**, parse the JSON response, and load it into a PostgreSQL database — all orchestrated via Airflow.
-
-This fulfills all assignment requirements, including:
-✔ API extraction
-✔ JSON parsing
-✔ Database loading
-✔ Error handling
-✔ Docker & Airflow orchestration
-✔ Environment variable–based configuration
-✔ Clean GitHub-ready project structure
-
----
-
-# 🏗 Architecture
+## 🏗️ Architecture
 
 ```mermaid
-flowchart TD
-    A[Alpha Vantage API<br>JSON Stock Data] --> B[Airflow DAG<br>Scheduler & Orchestrator]
-    B --> C[Python ETL Script<br>fetch_and_load.py]
-    C --> D[(PostgreSQL Database<br>stock_prices table)]
+graph TB
+    A[Alpha Vantage API] --> B[Airflow Scheduler]
+    B --> C[Python ETL Script]
+    C --> D[PostgreSQL Database]
+    B --> E[Airflow Webserver]
+    E --> F[Web UI Dashboard]
+    
+    subgraph "Docker Containers"
+        B
+        C
+        D
+        E
+    end
+    
+    style A fill:#ff9999
+    style D fill:#99ccff
+    style E fill:#99ff99
+    style F fill:#ffcc99
 ```
 
----
+### 📦 Components
 
-# 📁 Project Structure
+| Component | Purpose | Port |
+|-----------|---------|------|
+| **Airflow Webserver** | Web UI for monitoring pipelines | `:8080` |
+| **Airflow Scheduler** | Orchestrates and schedules DAGs | - |
+| **PostgreSQL** | Data storage and Airflow metadata | `:5432` |
+| **ETL Scripts** | Data fetching and processing logic | - |
 
-```
-.
-├── docker-compose.yml
-├── .env.example
-├── README.md
-├── airflow/
-│   ├── dags/
-│   │   └── stock_pipeline_dag.py
-│   └── requirements.txt
-├── scripts/
-│   └── fetch_and_load.py
-└── sql/
-    └── init.sql
-```
+## 🚀 Quick Start
 
-### Folder Description
+### Prerequisites
 
-| File/Folder                 | Description                          |
-| --------------------------- | ------------------------------------ |
-| `docker-compose.yml`        | Runs Airflow + PostgreSQL containers |
-| `airflow/dags/*.py`         | Airflow DAG definition               |
-| `scripts/fetch_and_load.py` | Python ETL logic                     |
-| `sql/init.sql`              | SQL script to auto-create table      |
-| `.env.example`              | Template for environment variables   |
-| `README.md`                 | Project documentation                |
+- Docker & Docker Compose installed
+- Alpha Vantage API key ([Get free key](https://www.alphavantage.co/support/#api-key))
 
----
-
-# 🛠️ Tech Stack
-
-* **Python 3.10+**
-* **Apache Airflow 2.9.0**
-* **Docker & Docker Compose**
-* **PostgreSQL 16**
-* **Alpha Vantage API**
-
----
-
-# 🔑 Environment Variables
-
-Create `.env` based on `.env.example`
-
-```env
-POSTGRES_DB=stocksdb
-POSTGRES_USER=stocksuser
-POSTGRES_PASSWORD=stockspass
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-
-AIRFLOW__CORE__LOAD_EXAMPLES=False
-
-ALPHA_VANTAGE_API_KEY=YOUR_API_KEY_HERE
-STOCK_SYMBOL=AAPL
-```
-
-⚠️ **Never commit your real `.env` to GitHub.**
-
----
-
-# ▶️ How to Run the Pipeline
-
-### **1️⃣ Clone the Repository**
+### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd docker-airflow-stock-pipeline
+git clone <repository-url>
+cd Docker-Airflow-Stock-pipeline_2
 ```
 
-### **2️⃣ Create `.env` File**
+### 2. Configure Environment
+
+Copy and edit the environment file:
 
 ```bash
-cp .env.example .env
+# Update the ALPHA_VANTAGE_API_KEY in .env file
+vim .env
 ```
 
-Add your real API key.
-
-### **3️⃣ Start Docker**
+### 3. Launch the Pipeline
 
 ```bash
-docker compose up --build
+# Start all services
+docker-compose up -d
+
+# View logs (optional)
+docker-compose logs -f
 ```
 
-### **4️⃣ Access Airflow UI**
+### 4. Access Airflow Dashboard
 
-Open:
-👉 [http://localhost:8080](http://localhost:8080)
+Open your browser and navigate to: **http://localhost:8080**
 
-Login:
+**Default Credentials:**
+- Username: `admin`
+- Password: `admin`
+
+### 5. Monitor Your Pipeline
+
+1. Navigate to the **DAGs** page
+2. Find `stock_price_pipeline` 
+3. Toggle it **ON** to start automated runs
+4. View execution history and logs
+
+## 📊 Monitoring
+
+### Airflow Web Interface
+
+The Airflow web UI provides comprehensive monitoring capabilities:
+
+- **📈 DAG Overview**: Visual pipeline representation
+- **📋 Task Logs**: Detailed execution logs for debugging
+- **⏰ Schedule History**: Track successful and failed runs
+- **🔄 Manual Triggers**: Run pipelines on-demand
+
+### Database Monitoring
+
+Connect to PostgreSQL to query your data:
+
+```bash
+# Connect to database
+docker exec -it postgres psql -U airflow -d airflow
+
+# Query stock data
+SELECT symbol, price, timestamp 
+FROM stock_prices 
+ORDER BY timestamp DESC 
+LIMIT 10;
+```
+
+## 🗂️ Project Structure
 
 ```
-username: admin
-password: admin
+├── 📁 airflow/
+│   ├── 📁 dags/
+│   │   └── 📄 stock_dag.py          # Main DAG definition
+│   ├── 📁 scripts/
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 fetch_and_store.py    # ETL logic
+│   └── 📄 requirements.txt          # Python dependencies
+├── 📁 db/
+│   └── 📄 init.sql                  # Database schema
+├── 📁 .vscode/
+│   └── 📄 settings.json             # VS Code configuration
+├── 📄 docker-compose.yml            # Container orchestration
+├── 📄 .env                          # Environment variables
+└── 📄 README.md                     # This file
 ```
 
-### **5️⃣ Trigger ETL Pipeline**
+## 🔧 Configuration
 
-1. Enable DAG: `stock_data_pipeline`
-2. Click **Trigger DAG**
+### Stock Symbol Configuration
+
+Update the stock symbol in [.env](.env):
+
+```bash
+STOCK_SYMBOL=AAPL  # Change to any valid stock symbol
+```
+
+### Schedule Configuration
+
+Modify the schedule in [`stock_dag.py`](airflow/dags/stock_dag.py):
+
+```python
+schedule_interval="@hourly"  # Options: @daily, @hourly, cron expressions
+```
+
+### Database Schema
+
+The pipeline creates the following table structure:
+
+```sql
+CREATE TABLE stock_prices (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(10) NOT NULL,
+    price NUMERIC(18, 4),      -- Current/Close price
+    open NUMERIC(18, 4),       -- Opening price
+    high NUMERIC(18, 4),       -- Highest price
+    low NUMERIC(18, 4),        -- Lowest price
+    volume BIGINT,             -- Trading volume
+    timestamp TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+## 🔍 API Integration
+
+### Alpha Vantage API
+
+The pipeline uses Alpha Vantage's **TIME_SERIES_INTRADAY** function:
+
+- **Interval**: 5-minute data points
+- **Rate Limit**: 5 requests per minute (free tier)
+- **Data Format**: JSON response with OHLCV data
+
+### Sample API Response Structure
+
+```json
+{
+  "Time Series (5min)": {
+    "2024-01-15 16:00:00": {
+      "1. open": "185.2000",
+      "2. high": "185.5000", 
+      "3. low": "184.8000",
+      "4. close": "185.1000",
+      "5. volume": "125000"
+    }
+  }
+}
+```
+
+## 🛠️ Development
+
+### Adding New Stock Symbols
+
+1. **Multi-symbol support**: Modify [`fetch_and_store.py`](airflow/scripts/fetch_and_store.py) to handle multiple symbols
+2. **Update environment**: Add symbols to [.env](.env) file
+3. **Database indexing**: Add indexes for better query performance
+
+### Custom Data Sources
+
+To integrate additional data sources:
+
+1. Create new scripts in [`airflow/scripts/`](airflow/scripts/)
+2. Add new tasks to [`stock_dag.py`](airflow/dags/stock_dag.py)
+3. Update dependencies in [`requirements.txt`](airflow/requirements.txt)
+
+### Local Development
+
+```bash
+# Install dependencies locally
+pip install -r airflow/requirements.txt
+
+# Run tests
+python -m pytest airflow/scripts/
+
+# Format code
+black airflow/scripts/
+```
+
+## 🐳 Docker Commands
+
+### Useful Docker Commands
+
+```bash
+# View running containers
+docker-compose ps
+
+# View logs for specific service
+docker-compose logs airflow-webserver
+
+# Restart services
+docker-compose restart
+
+# Stop all services
+docker-compose down
+
+# Rebuild containers
+docker-compose up --build
+
+# Access PostgreSQL CLI
+docker exec -it postgres psql -U airflow -d airflow
+
+# Access Airflow container
+docker exec -it airflow-webserver bash
+```
+
+## 📈 Usage Examples
+
+### Query Recent Stock Data
+
+```sql
+-- Get latest 24 hours of data
+SELECT symbol, price, open, high, low, volume, timestamp
+FROM stock_prices 
+WHERE timestamp >= NOW() - INTERVAL '24 hours'
+ORDER BY timestamp DESC;
+
+-- Calculate daily averages
+SELECT 
+    symbol,
+    DATE(timestamp) as date,
+    AVG(price) as avg_price,
+    MAX(high) as daily_high,
+    MIN(low) as daily_low,
+    SUM(volume) as total_volume
+FROM stock_prices 
+GROUP BY symbol, DATE(timestamp)
+ORDER BY date DESC;
+```
+
+### Airflow CLI Commands
+
+```bash
+# List all DAGs
+docker exec airflow-scheduler airflow dags list
+
+# Trigger DAG manually
+docker exec airflow-scheduler airflow dags trigger stock_price_pipeline
+
+# View task logs
+docker exec airflow-scheduler airflow tasks log stock_price_pipeline fetch_and_store_stock_data 2024-01-15
+```
+
+## 🔒 Security Considerations
+
+- **API Keys**: Store API keys securely in environment variables
+- **Database Access**: Use strong passwords and limit database access
+- **Network Security**: Configure firewall rules for production deployment
+- **Container Security**: Regularly update base images and dependencies
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+**🔴 Airflow Web UI not accessible**
+```bash
+# Check if containers are running
+docker-compose ps
+
+# Restart webserver
+docker-compose restart airflow-webserver
+```
+
+**🔴 Database connection errors**
+```bash
+# Verify PostgreSQL is running
+docker-compose logs postgres
+
+# Check environment variables
+docker exec airflow-webserver env | grep POSTGRES
+```
+
+**🔴 API rate limits exceeded**
+- Check Alpha Vantage API usage limits
+- Consider upgrading to premium plan
+- Implement exponential backoff in retry logic
+
+### Log Analysis
+
+```bash
+# View all logs
+docker-compose logs
+
+# Follow specific service logs
+docker-compose logs -f airflow-scheduler
+
+# View Airflow task logs via web UI
+# Navigate to: localhost:8080 → DAGs → stock_price_pipeline → Graph → Click task → View Log
+```
+
+## 🤝 Contributing
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Apache Airflow** - Workflow orchestration platform
+- **Alpha Vantage** - Stock market data API
+- **PostgreSQL** - Robust database system
+- **Docker** - Containerization platform
 
 ---
 
-# 🗄 Database Table
+<div align="center">
 
-Created automatically using `sql/init.sql`:
+**⭐ Star this repository if it helped you!**
 
-| Column     | Type                    |
-| ---------- | ----------------------- |
-| id         | SERIAL PRIMARY KEY      |
-| symbol     | VARCHAR(10)             |
-| ts         | TIMESTAMP               |
-| open       | NUMERIC                 |
-| high       | NUMERIC                 |
-| low        | NUMERIC                 |
-| close      | NUMERIC                 |
-| volume     | BIGINT                  |
-| created_at | TIMESTAMP DEFAULT NOW() |
+[Report Bug](../../issues) • [Request Feature](../../issues) • [Documentation](../../wiki)
 
----
+Made with ❤️ by [Pranjal Tripathi](https://github.com/pranjal-tripathi)
 
-# 🐍 ETL Logic
-
-The Python script:
-
-* Fetches JSON stock data
-* Parses required values
-* Cleans data
-* Loads into PostgreSQL
-
-### Extract Example:
-
-```python
-resp = requests.get(API_URL, params=params)
-```
-
-### Transform Example:
-
-```python
-float(values.get("1. open", 0))
-int(values.get("5. volume", 0))
-```
-
-### Load Example:
-
-```python
-execute_values(cur, insert_query, rows)
-```
-
----
-
-# ⚠️ Error Handling & Robustness
-
-The ETL script includes:
-
-### 1️⃣ API Error Handling
-
-```python
-try:
-    resp.raise_for_status()
-except Exception as e:
-    print(f"[ERROR] API request failed: {e}")
-```
-
-### 2️⃣ Missing Data
-
-```python
-if not time_series:
-    print("[WARN] No stock data available")
-```
-
-### 3️⃣ Skipping Bad Records
-
-```python
-except Exception:
-    print("[WARN] Skipping a malformed record")
-```
-
-### 4️⃣ Database Error Handling
-
-```python
-except psycopg2.Error as e:
-    print(f"[ERROR] Database error: {e}")
-```
-
----
-
-# ⏱ Airflow DAG Scheduling
-
-Runs daily:
-
-```python
-schedule_interval="@daily"
-```
-
-Includes:
-
-* Retries
-* Retry delay
-* Logging
-* Single ETL task
-
----
-
-# 🐳 Docker Services
-
-| Service    | Purpose                                     |
-| ---------- | ------------------------------------------- |
-| `airflow`  | Webserver + Scheduler                       |
-| `postgres` | Relational database                         |
-| `python`   | Dependencies installed via requirements.txt |
-
----
-
-# 🚀 Optional Enhancements
-
-* Add Airflow email alerts
-* Add retry backoff for API
-* Add Power BI / Tableau dashboard
-* Move data to DWH (Snowflake, BigQuery)
-* Add monitoring with Grafana
-
----
-
-# 📸 Screenshots (Optional)
-
-Upload images and include them like:
-
-```markdown
-![Airflow DAG](images/airflow_dag.png)
-![Postgres Table](images/postgres_table.png)
-```
-
----
-
-# ✅ Assignment Requirements Checklist
-
-| Requirement                      | Status |
-| -------------------------------- | ------ |
-| Fetch API data                   | ✅      |
-| Parse JSON structure             | ✅      |
-| Extract relevant fields          | ✅      |
-| Store into database              | ✅      |
-| Implement orchestrator (Airflow) | ✅      |
-| Use Docker                       | ✅      |
-| Handle errors                    | ✅      |
-| Use env variables                | ✅      |
-| Provide complete README          | ✅      |
-| Create GitHub repo               | ✅      |
-
-
-
-
-
+</div>
